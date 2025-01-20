@@ -1,0 +1,9 @@
+name: CountyTitles
+version: 1.2.0-STABLE
+main: CountyTitles.countyTitles.CountyTitles
+api-version: 1.16
+commands:
+  countytitles:
+    description: Manage county titles
+    usage: /countytitles <reload|addregion|setpos1|setpos2|title|subtitle|info|list|finish|removeregion> <regionname> [value]
+    aliases: [ct, region]
