@@ -5,7 +5,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-
 import java.util.Arrays;
 
 public class CountyTitlesCommand implements CommandExecutor {
@@ -20,12 +19,22 @@ public class CountyTitlesCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&b[CountyTitles] &fv1.2.0\n&bAvailable commands: &a/countytitles <reload | addregion | setpos1 | setpos2 | title | subtitle | info | list | finish | removeregion>"));
+            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &fv1.2.1-SNAPSHOT\n&bAvailable commands: &a/countytitles reload " +
+                    "\n&a/countytitles addregion " +
+                    "\n&a/countytitles setpos1 " +
+                    "\n&a/countytitles setpos2 " +
+                    "\n&a/countytitles title " +
+                    "\n&a/countytitles subtitle" +
+                    "\n&a/countytitles info " +
+                    "\n&a/countytitles list" +
+                    "\n&a/countytitles save" +
+                    "\n&a/countytitles removeregion" +
+                    "\n&a/countytitles regioninfo"));
             return true;
         }
 
         if (args[0].equalsIgnoreCase("info")) {
-            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&bCountyTitles Plugin version 1.2.0\n&dHighly experimental release!\n&aCreated by Brennan Cheatwood"));
+            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &fPlugin version 1.2.1-SNAPSHOT\n&dHighly experimental release!\n&aCreated by Brennan Cheatwood"));
             return true;
         }
 
@@ -33,10 +42,10 @@ public class CountyTitlesCommand implements CommandExecutor {
             if (sender.hasPermission("countytitles.reload")) {
                 plugin.reloadConfig();
                 regionManager.reloadRegions(plugin.getConfig());
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&aCountyTitles configuration reloaded."));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &aConfiguration successfully reloaded."));
                 return true;
             } else {
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cYou do not have permission to use this command."));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &cYou do not have permission to use this command."));
                 return true;
             }
         }
@@ -44,9 +53,9 @@ public class CountyTitlesCommand implements CommandExecutor {
         if (args[0].equalsIgnoreCase("addregion")) {
             if (args.length == 2) {
                 regionManager.addRegion(args[1]);
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&aRegion: &f" + args[1] + " &asuccessfully added."));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &aRegion: &f" + args[1] + " &asuccessfully added."));
             } else {
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cUsage: /countytitles addregion <regionname>"));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles addregion <regionname>"));
             }
             return true;
         }
@@ -55,9 +64,9 @@ public class CountyTitlesCommand implements CommandExecutor {
             if (args.length == 2 && sender instanceof Player) {
                 Player player = (Player) sender;
                 regionManager.setRegionPos1(args[1], player.getLocation());
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&aPosition 1 for region: &f" + args[1] + " &aset."));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &aPosition 1 for region: &f" + args[1] + " &aset."));
             } else {
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cUsage: /countytitles setpos1 <regionname>"));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles setpos1 <regionname>"));
             }
             return true;
         }
@@ -66,9 +75,9 @@ public class CountyTitlesCommand implements CommandExecutor {
             if (args.length == 2 && sender instanceof Player) {
                 Player player = (Player) sender;
                 regionManager.setRegionPos2(args[1], player.getLocation());
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&aPosition 2 for region: &f" + args[1] + " &aset."));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &aPosition 2 for region: &f" + args[1] + " &aset."));
             } else {
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cUsage: /countytitles setpos2 <regionname>"));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles setpos2 <regionname>"));
             }
             return true;
         }
@@ -77,11 +86,14 @@ public class CountyTitlesCommand implements CommandExecutor {
             if (args.length >= 3) {
                 String regionName = args[1];
                 String title = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+                if (title.equals("''")) {
+                    title = "";
+                }
                 regionManager.setRegionTitle(regionName, title);
                 plugin.saveConfig();
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&aTitle for region: &f" + regionName + " &aset to &f" + title + "&a."));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &aTitle for region: &f" + regionName + " &aset to &f" + title + "&a."));
             } else {
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cUsage: /countytitles title <regionname> <title>"));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles title <regionname> <title>"));
             }
             return true;
         }
@@ -92,9 +104,9 @@ public class CountyTitlesCommand implements CommandExecutor {
                 String subtitle = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
                 regionManager.setRegionSubtitle(regionName, subtitle);
                 plugin.saveConfig();
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&aSubtitle for region: &f" + regionName + " &aset to &f" + subtitle + "&a."));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &aSubtitle for region: &f" + regionName + " &aset to &f" + subtitle + "&a."));
             } else {
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cUsage: /countytitles subtitle <regionname> <subtitle>"));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles subtitle <regionname> <subtitle>"));
             }
             return true;
         }
@@ -108,12 +120,12 @@ public class CountyTitlesCommand implements CommandExecutor {
             return true;
         }
 
-        if (args[0].equalsIgnoreCase("finish")) {
+        if (args[0].equalsIgnoreCase("save")) {
             if (regionManager.hasIncompleteRegions()) {
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cYou have incomplete regions. Please set both positions for all regions before finishing."));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &cYou have incomplete regions. Please set both positions for all regions before saving."));
             } else {
                 plugin.saveConfig();
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&aRegion configuration saved."));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &aAll regions & titles saved! &f(config.yml updated)"));
             }
             return true;
         }
@@ -121,14 +133,29 @@ public class CountyTitlesCommand implements CommandExecutor {
         if (args[0].equalsIgnoreCase("removeregion")) {
             if (args.length == 2) {
                 regionManager.removeRegion(args[1]);
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&aRegion: &f" + args[1] + " &asuccessfully removed."));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &aRegion: &f" + args[1] + " &asuccessfully removed."));
             } else {
-                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cUsage: /countytitles removeregion <regionname>"));
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles removeregion <regionname>"));
             }
             return true;
         }
 
-        sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&c&lHey! &7Sorry, that's an &cUnknown command.\n&bAvailable commands: &a/countytitles <reload | addregion | setpos1 | setpos2 | title | subtitle | info | list | finish | removeregion>"));
+        if (args[0].equalsIgnoreCase("regioninfo")) {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                Region region = regionManager.getRegionByLocation(player.getLocation());
+                if (region != null) {
+                    sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &aYou are currently in region: &f" + region.getName() + "&a."));
+                } else {
+                    sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &cYou are not in any region."));
+                }
+            } else {
+                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &cThis command can only be used by players."));
+            }
+            return true;
+        }
+
+        sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &c&lHey! &7Sorry, that's an &cUnknown command.\n&bAvailable commands: &a/countytitles <reload | addregion | setpos1 | setpos2 | title | subtitle | info | list | save | removeregion | regioninfo>"));
         return true;
     }
 }

@@ -21,7 +21,7 @@ public class CountyTitles extends JavaPlugin {
         saveDefaultConfig();
         regionManager = new RegionManager(getConfig());
         Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(
-                "&aCountyTitles &bv1.2.0 &ahas started up!\n               &fMy very first plugin! \n&dCreated with love, by Brennan Cheatwood"));
+                "&aCountyTitles &bv1.2.1 &ahas started up!\n               &fMy very first plugin! \n&dCreated with love, by Brennan Cheatwood"));
         this.getCommand("countytitles").setExecutor(new CountyTitlesCommand(this, regionManager));
 
         new BukkitRunnable() {
