@@ -1,0 +1,288 @@
+Index: dependency-reduced-pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\r\n  <modelVersion>4.0.0</modelVersion>\r\n  <groupId>CountyTitles</groupId>\r\n  <artifactId>CountyTitles</artifactId>\r\n  <name>CountyTitles v1.2.1-SNAPSHOT - Brennan Cheatwood</name>\r\n  <version>1.2.1-SNAPSHOT</version>\r\n  <build>\r\n    <defaultGoal>clean package</defaultGoal>\r\n    <resources>\r\n      <resource>\r\n        <filtering>true</filtering>\r\n        <directory>src/main/resources</directory>\r\n      </resource>\r\n    </resources>\r\n    <finalName>${project.artifactId}-${project.version}</finalName>\r\n    <plugins>\r\n      <plugin>\r\n        <artifactId>maven-compiler-plugin</artifactId>\r\n        <version>3.13.0</version>\r\n        <configuration>\r\n          <source>${java.version}</source>\r\n          <target>${java.version}</target>\r\n        </configuration>\r\n      </plugin>\r\n      <plugin>\r\n        <artifactId>maven-shade-plugin</artifactId>\r\n        <version>3.5.3</version>\r\n        <executions>\r\n          <execution>\r\n            <phase>package</phase>\r\n            <goals>\r\n              <goal>shade</goal>\r\n            </goals>\r\n          </execution>\r\n        </executions>\r\n      </plugin>\r\n    </plugins>\r\n  </build>\r\n  <repositories>\r\n    <repository>\r\n      <id>papermc-repo</id>\r\n      <url>https://repo.papermc.io/repository/maven-public/</url>\r\n    </repository>\r\n    <repository>\r\n      <id>sonatype</id>\r\n      <url>https://oss.sonatype.org/content/groups/public/</url>\r\n    </repository>\r\n  </repositories>\r\n  <dependencies>\r\n    <dependency>\r\n      <groupId>io.papermc.paper</groupId>\r\n      <artifactId>paper-api</artifactId>\r\n      <version>1.21.4-R0.1-SNAPSHOT</version>\r\n      <scope>provided</scope>\r\n    </dependency>\r\n  </dependencies>\r\n  <properties>\r\n    <java.version>21</java.version>\r\n    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\r\n  </properties>\r\n</project>\r\n
+===================================================================
+diff --git a/dependency-reduced-pom.xml b/dependency-reduced-pom.xml
+--- a/dependency-reduced-pom.xml	(revision 1dfbae1ec7b9ce01e8086941a1ed3bb869453000)
++++ b/dependency-reduced-pom.xml	(date 1737407353807)
+@@ -3,8 +3,8 @@
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>CountyTitles</groupId>
+   <artifactId>CountyTitles</artifactId>
+-  <name>CountyTitles v1.2.1-SNAPSHOT - Brennan Cheatwood</name>
+-  <version>1.2.1-SNAPSHOT</version>
++  <name>CountyTitles v1.2.5 - Brennan Cheatwood</name>
++  <version>1.2.5-RELEASE</version>
+   <build>
+     <defaultGoal>clean package</defaultGoal>
+     <resources>
+Index: src/main/java/CountyTitles/countyTitles/CountyTitles.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package CountyTitles.countyTitles;\r\n\r\nimport org.bukkit.Bukkit;\r\nimport org.bukkit.Location;\r\nimport org.bukkit.entity.Player;\r\nimport org.bukkit.plugin.java.JavaPlugin;\r\nimport org.bukkit.scheduler.BukkitRunnable;\r\nimport net.kyori.adventure.title.Title;\r\nimport net.kyori.adventure.text.Component;\r\nimport net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;\r\nimport java.time.Duration;\r\nimport java.util.HashMap;\r\nimport java.util.Map;\r\n\r\npublic class CountyTitles extends JavaPlugin {\r\n    private RegionManager regionManager;\r\n    private Map<Player, Region> playerRegions = new HashMap<>();\r\n\r\n    @Override\r\n    public void onEnable() {\r\n        saveDefaultConfig();\r\n        regionManager = new RegionManager(getConfig());\r\n        Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\r\n                \"&aCountyTitles &bv1.2.1 &ahas started up!\\n               &fMy very first plugin! \\n&dCreated with love, by Brennan Cheatwood\"));\r\n        this.getCommand(\"countytitles\").setExecutor(new CountyTitlesCommand(this, regionManager));\r\n\r\n        new BukkitRunnable() {\r\n            @Override\r\n            public void run() {\r\n                for (Player player : Bukkit.getOnlinePlayers()) {\r\n                    Location loc = player.getLocation();\r\n                    Region currentRegion = regionManager.getRegionByLocation(loc);\r\n                    Region previousRegion = playerRegions.get(player);\r\n\r\n                    if (currentRegion != null && !currentRegion.equals(previousRegion)) {\r\n                        String titleText = getConfig().getString(\"regions.\" + currentRegion.getName() + \".title\", \"&oAwaiting Title\");\r\n                        String subtitleText = getConfig().getString(\"regions.\" + currentRegion.getName() + \".subtitle\", \"&a&o/countytitles subtitle <regionname> <subtitle>\");\r\n                        Component titleComponent = titleText.isEmpty() ? Component.empty() : LegacyComponentSerializer.legacyAmpersand().deserialize(titleText);\r\n                        Component subtitleComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(subtitleText);\r\n                        Title title = Title.title(\r\n                                titleComponent,\r\n                                subtitleComponent,\r\n                                Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(3), Duration.ofSeconds(1))\r\n                        );\r\n                        player.showTitle(title);\r\n                        playerRegions.put(player, currentRegion);\r\n                    } else if (currentRegion == null && previousRegion != null) {\r\n                        playerRegions.remove(player);\r\n                    }\r\n                }\r\n            }\r\n        }.runTaskTimer(this, 0, 20);\r\n    }\r\n\r\n    @Override\r\n    public void onDisable() {\r\n        getLogger().info(\"CountyTitles has been disabled!\");\r\n    }\r\n}
+===================================================================
+diff --git a/src/main/java/CountyTitles/countyTitles/CountyTitles.java b/src/main/java/CountyTitles/countyTitles/CountyTitles.java
+--- a/src/main/java/CountyTitles/countyTitles/CountyTitles.java	(revision 1dfbae1ec7b9ce01e8086941a1ed3bb869453000)
++++ b/src/main/java/CountyTitles/countyTitles/CountyTitles.java	(date 1737407274416)
+@@ -21,8 +21,9 @@
+         saveDefaultConfig();
+         regionManager = new RegionManager(getConfig());
+         Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(
+-                "&aCountyTitles &bv1.2.1 &ahas started up!\n               &fMy very first plugin! \n&dCreated with love, by Brennan Cheatwood"));
++                "&aCountyTitles &bv1.2.5 &ahas started up!\n               &fMy very first plugin! \n&dCreated with love, by Brennan Cheatwood"));
+         this.getCommand("countytitles").setExecutor(new CountyTitlesCommand(this, regionManager));
++        getServer().getPluginManager().registerEvents(new RegionEnterListener(this, regionManager), this);
+ 
+         new BukkitRunnable() {
+             @Override
+@@ -52,6 +53,10 @@
+         }.runTaskTimer(this, 0, 20);
+     }
+ 
++    public RegionManager getRegionManager() {
++        return regionManager;
++    }
++
+     @Override
+     public void onDisable() {
+         getLogger().info("CountyTitles has been disabled!");
+Index: src/main/java/CountyTitles/countyTitles/Region.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package CountyTitles.countyTitles;\r\n\r\nimport org.bukkit.Location;\r\n\r\npublic class Region {\r\n    private String name;\r\n    private String title;\r\n    private String subtitle;\r\n    private Location pos1;\r\n    private Location pos2;\r\n\r\n    public Region(String name) {\r\n        this.name = name;\r\n        this.title = \"&oAwaiting Title\";\r\n        this.subtitle = \"&a&o/countytitles subtitle <regionname> <subtitle>\";\r\n    }\r\n\r\n    public Region(String name, String title, String subtitle) {\r\n        this.name = name;\r\n        this.title = title;\r\n        this.subtitle = subtitle;\r\n    }\r\n\r\n    public void setPos1(Location pos1) {\r\n        this.pos1 = pos1;\r\n    }\r\n\r\n    public void setPos2(Location pos2) {\r\n        this.pos2 = pos2;\r\n    }\r\n\r\n    public void setTitle(String title) {\r\n        this.title = title;\r\n    }\r\n\r\n    public void setSubtitle(String subtitle) {\r\n        this.subtitle = subtitle;\r\n    }\r\n\r\n    public boolean contains(Location location) {\r\n        if (pos1 == null || pos2 == null || location == null) {\r\n            return false;\r\n        }\r\n\r\n        double minX = Math.min(pos1.getX(), pos2.getX());\r\n        double maxX = Math.max(pos1.getX(), pos2.getX());\r\n        double minY = Math.min(pos1.getY(), pos2.getY());\r\n        double maxY = Math.max(pos1.getY(), pos2.getY());\r\n        double minZ = Math.min(pos1.getZ(), pos2.getZ());\r\n        double maxZ = Math.max(pos1.getZ(), pos2.getZ());\r\n\r\n        double locX = location.getX();\r\n        double locY = location.getY();\r\n        double locZ = location.getZ();\r\n\r\n        return locX >= minX && locX <= maxX &&\r\n                locY >= minY && locY <= maxY &&\r\n                locZ >= minZ && locZ <= maxZ;\r\n    }\r\n\r\n    public String getName() {\r\n        return name;\r\n    }\r\n\r\n    public Location getPos1() {\r\n        return pos1;\r\n    }\r\n\r\n    public Location getPos2() {\r\n        return pos2;\r\n    }\r\n}
+===================================================================
+diff --git a/src/main/java/CountyTitles/countyTitles/Region.java b/src/main/java/CountyTitles/countyTitles/Region.java
+--- a/src/main/java/CountyTitles/countyTitles/Region.java	(revision 1dfbae1ec7b9ce01e8086941a1ed3bb869453000)
++++ b/src/main/java/CountyTitles/countyTitles/Region.java	(date 1737406797126)
+@@ -6,6 +6,7 @@
+     private String name;
+     private String title;
+     private String subtitle;
++    private String actionbarMessage;
+     private Location pos1;
+     private Location pos2;
+ 
+@@ -13,12 +14,14 @@
+         this.name = name;
+         this.title = "&oAwaiting Title";
+         this.subtitle = "&a&o/countytitles subtitle <regionname> <subtitle>";
++        this.actionbarMessage = "&a&o/countytitles actionbar <regionname> <actionbarmessage>";
+     }
+ 
+-    public Region(String name, String title, String subtitle) {
++    public Region(String name, String title, String subtitle, String actionbarMessage) {
+         this.name = name;
+         this.title = title;
+         this.subtitle = subtitle;
++        this.actionbarMessage = actionbarMessage;
+     }
+ 
+     public void setPos1(Location pos1) {
+@@ -37,6 +40,10 @@
+         this.subtitle = subtitle;
+     }
+ 
++    public void setActionbarMessage(String actionbarMessage) {
++        this.actionbarMessage = actionbarMessage;
++    }
++
+     public boolean contains(Location location) {
+         if (pos1 == null || pos2 == null || location == null) {
+             return false;
+@@ -62,6 +69,10 @@
+         return name;
+     }
+ 
++    public String getActionbarMessage() {
++        return actionbarMessage;
++    }
++
+     public Location getPos1() {
+         return pos1;
+     }
+Index: src/main/java/CountyTitles/countyTitles/CountyTitlesCommand.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package CountyTitles.countyTitles;\r\n\r\nimport org.bukkit.command.Command;\r\nimport org.bukkit.command.CommandExecutor;\r\nimport org.bukkit.command.CommandSender;\r\nimport org.bukkit.entity.Player;\r\nimport net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;\r\nimport java.util.Arrays;\r\n\r\npublic class CountyTitlesCommand implements CommandExecutor {\r\n    private final CountyTitles plugin;\r\n    private final RegionManager regionManager;\r\n\r\n    public CountyTitlesCommand(CountyTitles plugin, RegionManager regionManager) {\r\n        this.plugin = plugin;\r\n        this.regionManager = regionManager;\r\n    }\r\n\r\n    @Override\r\n    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {\r\n        if (args.length == 0) {\r\n            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &fv1.2.1-SNAPSHOT\\n&bAvailable commands: &a/countytitles reload \" +\r\n                    \"\\n&a/countytitles addregion \" +\r\n                    \"\\n&a/countytitles setpos1 \" +\r\n                    \"\\n&a/countytitles setpos2 \" +\r\n                    \"\\n&a/countytitles title \" +\r\n                    \"\\n&a/countytitles subtitle\" +\r\n                    \"\\n&a/countytitles info \" +\r\n                    \"\\n&a/countytitles list\" +\r\n                    \"\\n&a/countytitles save\" +\r\n                    \"\\n&a/countytitles removeregion\" +\r\n                    \"\\n&a/countytitles regioninfo\"));\r\n            return true;\r\n        }\r\n\r\n        if (args[0].equalsIgnoreCase(\"info\")) {\r\n            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &fPlugin version 1.2.1-SNAPSHOT\\n&dHighly experimental release!\\n&aCreated by Brennan Cheatwood\"));\r\n            return true;\r\n        }\r\n\r\n        if (args[0].equalsIgnoreCase(\"reload\")) {\r\n            if (sender.hasPermission(\"countytitles.reload\")) {\r\n                plugin.reloadConfig();\r\n                regionManager.reloadRegions(plugin.getConfig());\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &aConfiguration successfully reloaded.\"));\r\n                return true;\r\n            } else {\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &cYou do not have permission to use this command.\"));\r\n                return true;\r\n            }\r\n        }\r\n\r\n        if (args[0].equalsIgnoreCase(\"addregion\")) {\r\n            if (args.length == 2) {\r\n                regionManager.addRegion(args[1]);\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &aRegion: &f\" + args[1] + \" &asuccessfully added.\"));\r\n            } else {\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles addregion <regionname>\"));\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (args[0].equalsIgnoreCase(\"setpos1\")) {\r\n            if (args.length == 2 && sender instanceof Player) {\r\n                Player player = (Player) sender;\r\n                regionManager.setRegionPos1(args[1], player.getLocation());\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &aPosition 1 for region: &f\" + args[1] + \" &aset.\"));\r\n            } else {\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles setpos1 <regionname>\"));\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (args[0].equalsIgnoreCase(\"setpos2\")) {\r\n            if (args.length == 2 && sender instanceof Player) {\r\n                Player player = (Player) sender;\r\n                regionManager.setRegionPos2(args[1], player.getLocation());\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &aPosition 2 for region: &f\" + args[1] + \" &aset.\"));\r\n            } else {\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles setpos2 <regionname>\"));\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (args[0].equalsIgnoreCase(\"title\")) {\r\n            if (args.length >= 3) {\r\n                String regionName = args[1];\r\n                String title = String.join(\" \", Arrays.copyOfRange(args, 2, args.length));\r\n                if (title.equals(\"''\")) {\r\n                    title = \"\";\r\n                }\r\n                regionManager.setRegionTitle(regionName, title);\r\n                plugin.saveConfig();\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &aTitle for region: &f\" + regionName + \" &aset to &f\" + title + \"&a.\"));\r\n            } else {\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles title <regionname> <title>\"));\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (args[0].equalsIgnoreCase(\"subtitle\")) {\r\n            if (args.length >= 3) {\r\n                String regionName = args[1];\r\n                String subtitle = String.join(\" \", Arrays.copyOfRange(args, 2, args.length));\r\n                regionManager.setRegionSubtitle(regionName, subtitle);\r\n                plugin.saveConfig();\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &aSubtitle for region: &f\" + regionName + \" &aset to &f\" + subtitle + \"&a.\"));\r\n            } else {\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles subtitle <regionname> <subtitle>\"));\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (args[0].equalsIgnoreCase(\"list\")) {\r\n            StringBuilder regionList = new StringBuilder(\"&bRegions:\\n\");\r\n            for (String regionName : regionManager.getRegionNames()) {\r\n                regionList.append(\"&a- \").append(regionName).append(\"\\n\");\r\n            }\r\n            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(regionList.toString()));\r\n            return true;\r\n        }\r\n\r\n        if (args[0].equalsIgnoreCase(\"save\")) {\r\n            if (regionManager.hasIncompleteRegions()) {\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &cYou have incomplete regions. Please set both positions for all regions before saving.\"));\r\n            } else {\r\n                plugin.saveConfig();\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &aAll regions & titles saved! &f(config.yml updated)\"));\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (args[0].equalsIgnoreCase(\"removeregion\")) {\r\n            if (args.length == 2) {\r\n                regionManager.removeRegion(args[1]);\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &aRegion: &f\" + args[1] + \" &asuccessfully removed.\"));\r\n            } else {\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles removeregion <regionname>\"));\r\n            }\r\n            return true;\r\n        }\r\n\r\n        if (args[0].equalsIgnoreCase(\"regioninfo\")) {\r\n            if (sender instanceof Player) {\r\n                Player player = (Player) sender;\r\n                Region region = regionManager.getRegionByLocation(player.getLocation());\r\n                if (region != null) {\r\n                    sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &aYou are currently in region: &f\" + region.getName() + \"&a.\"));\r\n                } else {\r\n                    sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &cYou are not in any region.\"));\r\n                }\r\n            } else {\r\n                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &cThis command can only be used by players.\"));\r\n            }\r\n            return true;\r\n        }\r\n\r\n        sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(\"&f&lCounty&b&lTitles &7&l>> &c&lHey! &7Sorry, that's an &cUnknown command.\\n&bAvailable commands: &a/countytitles <reload | addregion | setpos1 | setpos2 | title | subtitle | info | list | save | removeregion | regioninfo>\"));\r\n        return true;\r\n    }\r\n}
+===================================================================
+diff --git a/src/main/java/CountyTitles/countyTitles/CountyTitlesCommand.java b/src/main/java/CountyTitles/countyTitles/CountyTitlesCommand.java
+--- a/src/main/java/CountyTitles/countyTitles/CountyTitlesCommand.java	(revision 1dfbae1ec7b9ce01e8086941a1ed3bb869453000)
++++ b/src/main/java/CountyTitles/countyTitles/CountyTitlesCommand.java	(date 1737407314819)
+@@ -19,12 +19,14 @@
+     @Override
+     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+         if (args.length == 0) {
+-            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &fv1.2.1-SNAPSHOT\n&bAvailable commands: &a/countytitles reload " +
++            sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &fv1.2.5\n&bAvailable commands: &a/countytitles reload " +
+                     "\n&a/countytitles addregion " +
+                     "\n&a/countytitles setpos1 " +
+                     "\n&a/countytitles setpos2 " +
+                     "\n&a/countytitles title " +
+                     "\n&a/countytitles subtitle" +
++                    "\n&a/countytitles actionbar" +
++                    "\n&a/countytitles disable" +
+                     "\n&a/countytitles info " +
+                     "\n&a/countytitles list" +
+                     "\n&a/countytitles save" +
+@@ -102,6 +104,9 @@
+             if (args.length >= 3) {
+                 String regionName = args[1];
+                 String subtitle = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
++                if (subtitle.equals("''")) {
++                    subtitle = "";
++                }
+                 regionManager.setRegionSubtitle(regionName, subtitle);
+                 plugin.saveConfig();
+                 sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &aSubtitle for region: &f" + regionName + " &aset to &f" + subtitle + "&a."));
+@@ -111,6 +116,31 @@
+             return true;
+         }
+ 
++        if (args[0].equalsIgnoreCase("actionbar")) {
++            if (args.length >= 3) {
++                String regionName = args[1];
++                String actionbarMessage = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
++                regionManager.setRegionActionbarMessage(regionName, actionbarMessage);
++                plugin.saveConfig();
++                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &aActionbar message for region: &f" + regionName + " &aset to &f" + actionbarMessage + "&a."));
++            } else {
++                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles actionbar <regionname> <message>"));
++            }
++            return true;
++        }
++
++        if (args[0].equalsIgnoreCase("disable")) {
++            if (args.length == 2) {
++                String regionName = args[1];
++                regionManager.disableRegionTitles(regionName);
++                plugin.saveConfig();
++                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &aTitles and subtitles for region: &f" + regionName + " &ahave been disabled."));
++            } else {
++                sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &cUsage: /countytitles disable <regionname>"));
++            }
++            return true;
++        }
++
+         if (args[0].equalsIgnoreCase("list")) {
+             StringBuilder regionList = new StringBuilder("&bRegions:\n");
+             for (String regionName : regionManager.getRegionNames()) {
+@@ -155,7 +185,7 @@
+             return true;
+         }
+ 
+-        sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &c&lHey! &7Sorry, that's an &cUnknown command.\n&bAvailable commands: &a/countytitles <reload | addregion | setpos1 | setpos2 | title | subtitle | info | list | save | removeregion | regioninfo>"));
++        sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&f&lCounty&b&lTitles &7&l>> &c&lHey! &7Sorry, that's an &cUnknown command.\n&bAvailable commands: &a/countytitles <reload | addregion | setpos1 | setpos2 | title | subtitle | actionbar | disable | info | list | save | removeregion | regioninfo>"));
+         return true;
+     }
+ }
+\ No newline at end of file
+Index: src/main/java/CountyTitles/countyTitles/RegionManager.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package CountyTitles.countyTitles;\r\n\r\nimport org.bukkit.Location;\r\nimport org.bukkit.configuration.Configuration;\r\nimport org.bukkit.configuration.ConfigurationSection;\r\nimport org.bukkit.configuration.file.FileConfiguration;\r\n\r\nimport java.util.HashMap;\r\nimport java.util.Map;\r\n\r\npublic class RegionManager {\r\n    private final Map<String, Region> regions = new HashMap<>();\r\n    private final FileConfiguration config;\r\n\r\n    public RegionManager(FileConfiguration config) {\r\n        this.config = config;\r\n        loadRegions(config);\r\n    }\r\n\r\n    public void addRegion(String name) {\r\n        regions.put(name, new Region(name));\r\n    }\r\n\r\n    public void setRegionPos1(String name, Location pos1) {\r\n        Region region = regions.get(name);\r\n        if (region != null) {\r\n            region.setPos1(pos1);\r\n            config.set(\"regions.\" + name + \".pos1\", pos1);\r\n        }\r\n    }\r\n\r\n    public void setRegionPos2(String name, Location pos2) {\r\n        Region region = regions.get(name);\r\n        if (region != null) {\r\n            region.setPos2(pos2);\r\n            config.set(\"regions.\" + name + \".pos2\", pos2);\r\n        }\r\n    }\r\n\r\n    public void setRegionTitle(String name, String title) {\r\n        Region region = regions.get(name);\r\n        if (region != null) {\r\n            region.setTitle(title);\r\n            config.set(\"regions.\" + name + \".title\", title);\r\n        }\r\n    }\r\n\r\n    public void setRegionSubtitle(String name, String subtitle) {\r\n        Region region = regions.get(name);\r\n        if (region != null) {\r\n            region.setSubtitle(subtitle);\r\n            config.set(\"regions.\" + name + \".subtitle\", subtitle);\r\n        }\r\n    }\r\n\r\n    public Region getRegionByLocation(Location location) {\r\n        for (Region region : regions.values()) {\r\n            if (region.contains(location)) {\r\n                return region;\r\n            }\r\n        }\r\n        return null;\r\n    }\r\n\r\n    public Iterable<String> getRegionNames() {\r\n        return regions.keySet();\r\n    }\r\n\r\n    public boolean hasIncompleteRegions() {\r\n        for (Region region : regions.values()) {\r\n            if (region.getPos1() == null || region.getPos2() == null) {\r\n                return true;\r\n            }\r\n        }\r\n        return false;\r\n    }\r\n\r\n    public void reloadRegions(Configuration config) {\r\n        regions.clear();\r\n        loadRegions(config);\r\n    }\r\n\r\n    public void removeRegion(String name) {\r\n        regions.remove(name);\r\n        config.set(\"regions.\" + name, null);\r\n    }\r\n\r\n    private void loadRegions(Configuration config) {\r\n        ConfigurationSection regionsSection = config.getConfigurationSection(\"regions\");\r\n        if (regionsSection != null) {\r\n            for (String regionName : regionsSection.getKeys(false)) {\r\n                String title = regionsSection.getString(regionName + \".title\", \"&oAwaiting Title\");\r\n                String subtitle = regionsSection.getString(regionName + \".subtitle\", \"&a&o/countytitles subtitle <regionname> <subtitle>\");\r\n                Location pos1 = regionsSection.getLocation(regionName + \".pos1\");\r\n                Location pos2 = regionsSection.getLocation(regionName + \".pos2\");\r\n\r\n                Region region = new Region(regionName, title, subtitle);\r\n                region.setPos1(pos1);\r\n                region.setPos2(pos2);\r\n                regions.put(regionName, region);\r\n            }\r\n        }\r\n    }\r\n}
+===================================================================
+diff --git a/src/main/java/CountyTitles/countyTitles/RegionManager.java b/src/main/java/CountyTitles/countyTitles/RegionManager.java
+--- a/src/main/java/CountyTitles/countyTitles/RegionManager.java	(revision 1dfbae1ec7b9ce01e8086941a1ed3bb869453000)
++++ b/src/main/java/CountyTitles/countyTitles/RegionManager.java	(date 1737407274421)
+@@ -53,6 +53,24 @@
+         }
+     }
+ 
++    public void setRegionActionbarMessage(String name, String actionbarMessage) {
++        Region region = regions.get(name);
++        if (region != null) {
++            region.setActionbarMessage(actionbarMessage);
++            config.set("regions." + name + ".actionbar-message", actionbarMessage);
++        }
++    }
++
++    public void disableRegionTitles(String name) {
++        Region region = regions.get(name);
++        if (region != null) {
++            region.setTitle("");
++            region.setSubtitle("");
++            config.set("regions." + name + ".title", "");
++            config.set("regions." + name + ".subtitle", "");
++        }
++    }
++
+     public Region getRegionByLocation(Location location) {
+         for (Region region : regions.values()) {
+             if (region.contains(location)) {
+@@ -91,10 +109,11 @@
+             for (String regionName : regionsSection.getKeys(false)) {
+                 String title = regionsSection.getString(regionName + ".title", "&oAwaiting Title");
+                 String subtitle = regionsSection.getString(regionName + ".subtitle", "&a&o/countytitles subtitle <regionname> <subtitle>");
++                String actionbarMessage = regionsSection.getString(regionName + ".actionbar-message", "&a&o/countytitles actionbar <regionname> <actionbarmessage>");
+                 Location pos1 = regionsSection.getLocation(regionName + ".pos1");
+                 Location pos2 = regionsSection.getLocation(regionName + ".pos2");
+ 
+-                Region region = new Region(regionName, title, subtitle);
++                Region region = new Region(regionName, title, subtitle, actionbarMessage);
+                 region.setPos1(pos1);
+                 region.setPos2(pos2);
+                 regions.put(regionName, region);
+Index: src/main/resources/config.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#CountyTitles v1.2.1 (SNAPSHOT) - by Brennan Cheatwood (Copyright 2025)\r\n#This plugin is a simple tool for managing regions and their titles in Minecraft.\r\n#This plugin is highly experimental and may not work as intended. Use at your own risk.\r\n#Tested on Minecraft 1.21.4 running Paper 1.21.4\r\n\r\nregions:
+===================================================================
+diff --git a/src/main/resources/config.yml b/src/main/resources/config.yml
+--- a/src/main/resources/config.yml	(revision 1dfbae1ec7b9ce01e8086941a1ed3bb869453000)
++++ b/src/main/resources/config.yml	(date 1737407301679)
+@@ -1,6 +1,6 @@
+-#CountyTitles v1.2.1 (SNAPSHOT) - by Brennan Cheatwood (Copyright 2025)
+-#This plugin is a simple tool for managing regions and their titles in Minecraft.
+-#This plugin is highly experimental and may not work as intended. Use at your own risk.
+-#Tested on Minecraft 1.21.4 running Paper 1.21.4
++# CountyTitles v1.2.5 (RELEASE) - by Brennan Cheatwood (Copyright 2025)
++# This plugin is a simple tool for managing regions and their titles in Minecraft.
++# This plugin is highly experimental and may not work as intended. Use at your own risk.
++# Tested on Minecraft 1.21.4 running Paper 1.21.4
+ 
+-regions:
+\ No newline at end of file
++regions:
+Index: src/main/resources/plugin.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>name: CountyTitles\r\nversion: 1.2.1-SNAPSHOT\r\nmain: CountyTitles.countyTitles.CountyTitles\r\napi-version: 1.16\r\ncommands:\r\n  countytitles:\r\n    description: Manage county titles\r\n    usage: /countytitles <reload|addregion|setpos1|setpos2|title|subtitle|info|list|save|removeregion> <regionname> [value]\r\n    aliases: [ct, region]
+===================================================================
+diff --git a/src/main/resources/plugin.yml b/src/main/resources/plugin.yml
+--- a/src/main/resources/plugin.yml	(revision 1dfbae1ec7b9ce01e8086941a1ed3bb869453000)
++++ b/src/main/resources/plugin.yml	(date 1737407301675)
+@@ -1,9 +1,9 @@
+ name: CountyTitles
+-version: 1.2.1-SNAPSHOT
++version: 1.2.5-RELEASE
+ main: CountyTitles.countyTitles.CountyTitles
+ api-version: 1.16
+ commands:
+   countytitles:
+     description: Manage county titles
+-    usage: /countytitles <reload|addregion|setpos1|setpos2|title|subtitle|info|list|save|removeregion> <regionname> [value]
++    usage: /countytitles <reload|addregion|setpos1|setpos2|title|subtitle|info|list|save|removeregion|actionbar> <regionname> [value]
+     aliases: [ct, region]
+\ No newline at end of file
+Index: pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><project xmlns=\"http://maven.apache.org/POM/4.0.0\"\r\n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://www.apache.org/xsd/maven-4.0.0.xsd\">\r\n    <modelVersion>4.0.0</modelVersion>\r\n\r\n    <groupId>CountyTitles</groupId>\r\n    <artifactId>CountyTitles</artifactId>\r\n    <version>1.2.1-SNAPSHOT</version>\r\n    <packaging>jar</packaging>\r\n\r\n    <name>CountyTitles v1.2.1-SNAPSHOT - Brennan Cheatwood</name>\r\n\r\n    <properties>\r\n        <java.version>21</java.version>\r\n        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\r\n    </properties>\r\n\r\n    <build>\r\n        <finalName>${project.artifactId}-${project.version}</finalName>\r\n        <defaultGoal>clean package</defaultGoal>\r\n        <plugins>\r\n            <plugin>\r\n                <groupId>org.apache.maven.plugins</groupId>\r\n                <artifactId>maven-compiler-plugin</artifactId>\r\n                <version>3.13.0</version>\r\n                <configuration>\r\n                    <source>${java.version}</source>\r\n                    <target>${java.version}</target>\r\n                </configuration>\r\n            </plugin>\r\n            <plugin>\r\n                <groupId>org.apache.maven.plugins</groupId>\r\n                <artifactId>maven-shade-plugin</artifactId>\r\n                <version>3.5.3</version>\r\n                <executions>\r\n                    <execution>\r\n                        <phase>package</phase>\r\n                        <goals>\r\n                            <goal>shade</goal>\r\n                        </goals>\r\n                    </execution>\r\n                </executions>\r\n            </plugin>\r\n        </plugins>\r\n        <resources>\r\n            <resource>\r\n                <directory>src/main/resources</directory>\r\n                <filtering>true</filtering>\r\n            </resource>\r\n        </resources>\r\n    </build>\r\n\r\n    <repositories>\r\n        <repository>\r\n            <id>papermc-repo</id>\r\n            <url>https://repo.papermc.io/repository/maven-public/</url>\r\n        </repository>\r\n        <repository>\r\n            <id>sonatype</id>\r\n            <url>https://oss.sonatype.org/content/groups/public/</url>\r\n        </repository>\r\n    </repositories>\r\n\r\n    <dependencies>\r\n        <dependency>\r\n            <groupId>io.papermc.paper</groupId>\r\n            <artifactId>paper-api</artifactId>\r\n            <version>1.21.4-R0.1-SNAPSHOT</version>\r\n            <scope>provided</scope>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>net.kyori</groupId>\r\n            <artifactId>adventure-platform-bukkit</artifactId>\r\n            <version>4.3.0</version>\r\n        </dependency>\r\n    </dependencies>\r\n</project>
+===================================================================
+diff --git a/pom.xml b/pom.xml
+--- a/pom.xml	(revision 1dfbae1ec7b9ce01e8086941a1ed3bb869453000)
++++ b/pom.xml	(date 1737407332253)
+@@ -5,10 +5,10 @@
+ 
+     <groupId>CountyTitles</groupId>
+     <artifactId>CountyTitles</artifactId>
+-    <version>1.2.1-SNAPSHOT</version>
++    <version>1.2.5-RELEASE</version>
+     <packaging>jar</packaging>
+ 
+-    <name>CountyTitles v1.2.1-SNAPSHOT - Brennan Cheatwood</name>
++    <name>CountyTitles v1.2.5 - Brennan Cheatwood</name>
+ 
+     <properties>
+         <java.version>21</java.version>
